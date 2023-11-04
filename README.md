@@ -16,7 +16,90 @@ Apply Feature selection techniques to all the features of the data set
 ### STEP 4
 Save the data to the file
 
-
 # CODE
+## titanic_dataset.csv :
+```
+import pandas as pd
+import numpy as np
+from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import chi2
+from google.colab import files
+upload = files.upload()
+data = pd.read_csv('titanic_dataset.csv')
+data
+```
+![image](https://github.com/Sudhar2303/ODD2023-Datascience-Ex-07/assets/133684710/42abf264-7e1d-4eb3-ae5a-b59e5c5cf678)
+```
+data.isnull().sum()
+```
+![image](https://github.com/Sudhar2303/ODD2023-Datascience-Ex-07/assets/133684710/b3257437-7145-4d63-a2d1-6cdead8ead36)
+```
+data.drop(['PassengerId', 'Name', 'Ticket', 'Cabin'], axis=1, inplace=True)
+from sklearn.preprocessing import LabelEncoder
+le = LabelEncoder()
+data['Sex'] = le.fit_transform(data['Sex'])
+data['Embarked'] = le.fit_transform(data['Embarked'].astype(str))
+from sklearn.impute import SimpleImputer
+imputer = SimpleImputer(missing_values=np.nan, strategy='median')
+data[['Age']] = imputer.fit_transform(data[['Age']])
+print("Feature selection")
+X = data.iloc[:, :-1]
+y = data.iloc[:, -1]
+selector = SelectKBest(chi2, k=3)
+X_new = selector.fit_transform(X, y)
+print(X_new)
 
-# OUPUT
+```
+![image](https://github.com/Sudhar2303/ODD2023-Datascience-Ex-07/assets/133684710/9448bcc6-ce73-4408-a143-b3458d2d0d67)
+```
+df_new = pd.DataFrame(X_new, columns=['Pclass', 'Age', 'Fare'])
+df_new['Survived'] = y.values
+df_new.to_csv('titanic_transformed.csv', index=False)
+print(df_new)
+```
+![image](https://github.com/Sudhar2303/ODD2023-Datascience-Ex-07/assets/133684710/db98ea2f-9b88-45ba-8e67-14c35f046b42)
+## CarPrice.csv:
+```
+from google.colab import files
+uploaded = files.upload()
+df = pd.read_csv("CarPrice.csv")
+df
+```
+![image](https://github.com/Sudhar2303/ODD2023-Datascience-Ex-07/assets/133684710/fbb5f78a-f153-4af6-9826-43144aa843cc)
+```
+df = df.drop(['car_ID', 'CarName'], axis=1)
+from sklearn.preprocessing import LabelEncoder
+le = LabelEncoder()
+df['fueltype'] = le.fit_transform(df['fueltype'])
+df['aspiration'] = le.fit_transform(df['aspiration'])
+df['doornumber'] = le.fit_transform(df['doornumber'])
+df['carbody'] = le.fit_transform(df['carbody'])
+df['drivewheel'] = le.fit_transform(df['drivewheel'])
+df['enginelocation'] = le.fit_transform(df['enginelocation'])
+df['enginetype'] = le.fit_transform(df['enginetype'])
+df['cylindernumber'] = le.fit_transform(df['cylindernumber'])
+df['fuelsystem'] = le.fit_transform(df['fuelsystem'])
+from sklearn.feature_selection import SelectKBest, f_regression
+from sklearn.ensemble import ExtraTreesRegressor
+from sklearn.model_selection import train_test_split
+X = df.iloc[:, :-1]
+y = df.iloc[:, -1]
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1)
+print("Univariate Selection")
+selector = SelectKBest(score_func=f_regression, k=10)
+X_train_new = selector.fit_transform(X_train, y_train)
+mask = selector.get_support()
+selected_features = X_train.columns[mask]
+model = ExtraTreesRegressor()
+model.fit(X_train, y_train)
+importance = model.feature_importances_
+indices = np.argsort(importance)[::-1]
+selected_features = X_train.columns[indices][:10]
+df_new = pd.concat([X_train[selected_features], y_train], axis=1)
+df_new.to_csv('CarPrice_new.csv', index=False)
+print(df_new)
+```
+![image](https://github.com/Sudhar2303/ODD2023-Datascience-Ex-07/assets/133684710/2c8e9ace-7d81-44b8-ac0e-827790c05bd9)
+
+# OUPUT :
+Thus,The various feature selection techniques for the given data has been performed on a dataset.
